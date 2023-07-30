@@ -4,8 +4,9 @@ A Test module
 """
 import unittest
 from unittest.mock import patch, MagicMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
+import fixtures
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -129,6 +130,52 @@ class TestGithubOrgClient(unittest.TestCase):
             # Assert the returned value is as expected
             self.assertEqual(result, expected_result)
 
+
+@parameterized_class(
+        ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
+        fixtures.TEST_PAYLOAD
+        )
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Patch requests.get to return example payloads from fixtures
+        cls.get_patcher = patch("requests.get")
+        cls.mock_get = cls.get_patcher.start()
+
+        # Configure the side_effect of mock_get to return the correct fixtures
+        cls.mock_get.side_effect = [
+            cls.org_payload,
+            cls.repos_payload,
+            cls.repos_payload,
+            cls.repos_payload,
+            cls.repos_payload,
+        ]
+
+    @classmethod
+    def tearDownClass(cls):
+        # Stop the patcher after the tests are done
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        # Create an instance of GithubOrgClient with a dummy org_name
+        github_client = GithubOrgClient("test_org")
+
+        # Call the public_repos method with license="mit"
+        repos = github_client.public_repos(license="mit")
+
+        # Assert the list of repos is what we expect from the chosen payload
+        self.assertEqual(repos, self.expected_repos)
+
+    def test_public_repos_with_license_key(self):
+        # Create an instance of GithubOrgClient with a dummy org_name
+        github_client = GithubOrgClient("test_org")
+
+        # Call the public_repos method with license="apache-2.0"
+        repos = github_client.public_repos(license="apache-2.0")
+
+        # Assert the list of repos is what we expect from the chosen payload
+        self.assertEqual(repos, self.apache2_repos)
 
 if __name__ == "__main__":
     unittest.main()
