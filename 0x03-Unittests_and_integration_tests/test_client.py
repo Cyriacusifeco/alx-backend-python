@@ -183,9 +183,15 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     fixtures.TEST_PAYLOAD
 )
 class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    Test inegration
+    """
 
     @classmethod
     def setUpClass(cls):
+        """
+        Setup class
+        """
         # Patch requests.get to return example payloads from fixtures
         cls.get_patcher = patch("requests.get")
         cls.mock_get = cls.get_patcher.start()
@@ -201,10 +207,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """
+        Tear down class
+        """
         # Stop the patcher after the tests are done
         cls.get_patcher.stop()
 
     def test_public_repos(self):
+        """
+        Test public Repos
+        """
         # Create an instance of GithubOrgClient with a dummy org_name
         github_client = GithubOrgClient("test_org")
 
@@ -215,6 +227,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         self.assertEqual(repos, self.expected_repos)
 
     def test_public_repos_with_license(self):
+        """
+        Test with license
+        """
         # Create an instance of GithubOrgClient with a dummy org_name
         github_client = GithubOrgClient("test_org")
 
